@@ -51,7 +51,7 @@
 									<p>In this post I'll show how you can create lists in Rapid7's nexpose vulnerability scanner. This method uses PowerShell to create a .json file to be used with postman to access the Rapid7 API.</p>
 								</header>
 								<div class="image main"><img src="images/nexpose.jpg" alt="" /></div>
-								<p>Using the WebIU in nexpose its possible to create static or dynamic lists. I've created several dynamic lists to track the progress of the Monthly "Patch Tuesday" cycle from Microsoft. The problem is that the WebIU in Rapid7 doesn’t allow for importing of a list of CVEs. The way this is done in the WebIU is that you have to add each CVE number individually. This is OK for a simple once off list but when Microsoft's monthly patch list is published, having to create a list of multiple CVEs gets quite boring and repetitive fast.</p>
+								<p>Using the WebUI in nexpose its possible to create static or dynamic lists. I've created several dynamic lists to track the progress of the Monthly "Patch Tuesday" cycle from Microsoft. The problem is that the WebUI in Rapid7 doesn’t allow for importing of a list of CVEs. The way this is done in the WebUI is that you have to add each CVE number individually. This is OK for a simple once off list but when Microsoft's monthly patch list is published, having to create a list of multiple CVEs gets quite boring and repetitive fast.</p>
 								<p>So this is how I choose to solve this problem.</p>
 								<p><h2>1. Create a TXT file with CVEs listed</h2></p>
 								<p>The best source I've found is Randy Franklin Smith's website <a href="https://www.ultimatewindowssecurity.com/"> Ultimatewindowssecurity.com</a>. Every month there is a simple list of reference CVE's that you can copy to a plain text file. You can also subscribe to his emails for a list of the same data.</p>
@@ -84,7 +84,7 @@ foreach ($cve in $cvelist) {
 Add-Content $file $string4$cve$string5
 }
 Add-Content $file $string3</pre></code></p>
-								<p>Save a copy of this code to a .ps1 file and open it in ISE. You will need to edit the $file and $cvefile variables. As well as editing the name of the new asset group to be created in nexpose. Once this is done when you run the file, this script will create a .json file in the correct format needed to instruct the nexpose API to create a new dynamic asset group.</p>
+								<p>Save a copy of <a href="https://github.com/sc4rr3d/Rapid7_Build_json/blob/master/Rapid7_Build_JSON.ps1">this code</a> to a .ps1 file and open it in ISE. You will need to edit the $file and $cvefile variables. As well as editing the name of the new asset group to be created in nexpose. Once this is done when you run the file, this script will create a .json file in the correct format needed to instruct the nexpose API to create a new dynamic asset group.</p>
 								<p><h2>3. Run the .json file with Postman</h2></p>
 								<p>In Chrome, download the extension <a href="https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop?hl=en">postman</a>. Once installed skip past the registration and start using the app. At the time of this post the app has been depreciated. However, it is still functional and does not require local admin rights to run.</p>
 								<div class="row">
@@ -96,7 +96,7 @@ Add-Content $file $string3</pre></code></p>
 												<li>Select Authorization and choose the type that will work in your environment.</li>
 												<li>Select Body, raw input, JSON (application/json)</li>
 												<li>Paste in the contents of the newly created .json file</li>
-												<li>Remove the comma from the last CVE. See the picture to the right -->. (I wasn't sure how to do this in PowerShell). Removing this last comma will allow the json input to run.</li>
+												<li>Remove the comma from the last CVE. Removing this last comma will allow the json input to run.</li>
 											</ol>
 										</div>
 										<div class="col-6 col-12-small">
