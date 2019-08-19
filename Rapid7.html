@@ -1,0 +1,131 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>SC4RR3D.com</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a href="index.html" class="logo">SC4RR3D.com</a>
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li class="active"><a href="index.html">Posts</a></li>
+							<li><a href="https://sc4rr3d.com/">Photography</a></li>
+							<li><a href="https://sc4rr3d.com/">Links</a></li>
+						</ul>
+						<ul class="icons">
+							<li><a href="https://twitter.com/GeradNewton" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+							<li><a href="https://www.linkedin.com/in/gerad-newton-32b13754/" class="icon brands fa-linkedin"><span class="label">Linkedin</span></a></li>
+							<!-- 
+							<li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li> 
+							-->
+							<li><a href="https://www.instagram.com/sc4rr3d_/" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+							<li><a href="https://github.com/sc4rr3d" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									<span class="date">19th August 2019</span>
+									<h1>Patch Tuesday with Rapid7</h1>
+									<p>In this post I'll show how you can create lists in Rapid7's nexpose vulnerability scanner. This method uses PowerShell to create a .json file to be used with postman to access the Rapid7 API.</p>
+								</header>
+								<div class="image main"><img src="images/nexpose.jpg" alt="" /></div>
+								<p>Using WebIU in nexpose its possible to create static or dynamic lists. I've created several dynamic lists to track the progress of the Monthly "Patch Tuesday" cycle from Microsoft. The problem is that the WebIU in Rapid7 doesn’t allow for importing of a list of CVEs. The way this is done in the WebIU is that you have to add each CVE number individually. This is OK for a simple once off list but when Microsoft's monthly patch list is published, having to create a list of multiple CVEs gets quite boring and repetitive fast.</p>
+								<p>So this is how I choose to solve this problem.</p>
+								<p><h2>1. Create a TXT file with CVEs listed</h2></p>
+								<p>The best source I've found is Randy Franklin Smith's website <a href="https://www.ultimatewindowssecurity.com/"> Ultimatewindowssecurity.com</a>. Every month there is a simple list of reference CVE's that you can copy to a plain text file. You can also subscribe to his emails for a list of the same data.</p>
+								<h2>2. Run Rapid7-build-json.ps1 from ISE</h2></p>
+								<p><pre> <code>$file = "D:\Scripts\JSON\2019.01.json"
+$cvefile = "D:\Scripts\CVE_List\2019.01.txt"
+$String1 = @"
+{
+    "description": "Monthly Microsoft OS Patching Compliance",
+    "name": "2019.01.MS.OS (Patch Tuesday)",
+    "searchCriteria": {
+        "filters": [
+"@
+$string3 = @"
+        ],
+        "match": "any"
+    },
+    "type": "dynamic"
+}
+"@
+$string4 = @"
+                { "field": "cve", "operator": "is", "value": "
+"@
+$string5 = @"
+" }, 
+"@
+$cvelist = Get-Content $cvefile
+Set-Content -Path $file -Value $string1 -force
+foreach ($cve in $cvelist) {
+Add-Content $file $string4$cve$string5
+}
+Add-Content $file $string3</pre></code></p>
+								<p>Save a copy of this code to a .ps1 file and open it in ISE. You will need to edit the $file and $cvefile variables. As well as editing the name of the new asset group to be created in nexpose. Once this is done when you run the file, this script will create a .json file in the correct format needed to instruct the nexpose API to create a new dynamic asset group.</p>
+								<p><h2>3. Run the .json file with Postman</h2></p>
+								<p>In Chrome, download the extension <a href="https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop?hl=en">postman</a>. In Chrome, download the extension postman. Once installed skip past the registration and start using the app. At the time of this post the app has been depreciated. However, it is still functional and does not require local admin rights to run.</p>
+								<div class="row">
+										<div class="col-6 col-12-small">
+
+											<h3>Within postman</h3>
+											<ol>
+												<li>Change the method from GET to POST. In the URL field enter <code>http://localhost/../../</code></li>
+												<li>Select Authorization and choose the type that will work in your environment.</li>
+												<li>Select Body, raw input, JSON (application/json)</li>
+												<li>Paste in the contents of the newly created .json file</li>
+												<li>Remove the comma from the last CVE. See the picture to the right -->. (I wasn't sure how to do this in PowerShell). Removing this last comma will allow the json input to run.</li>
+											</ol>
+										</div>
+										<div class="col-6 col-12-small">
+											<span class="image fit"><img src="images/postman.jpg" alt="" /></span>
+										</div>
+									
+								</div>
+								<p><h2>4. Click Send</h2></p>
+								<p>If everything is correct then you will get the response code 200. With a link to the your newly created asset group.</p>
+
+							</section>
+
+					</div>
+
+					<!-- Copyright -->
+					<div id="copyright">
+						<ul><li>&copy; SC4RR3D.com</li><li>Design: <a href="https://html5up.net">HTML5 UP</a></li></ul>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
